@@ -38,11 +38,28 @@
             }
         }
     })();
+    const extend = (thisClass, superClass) => {
+        try {
+            Object.setPrototypeOf(thisClass, superClass);
+            Object.setPrototypeOf(
+                thisClass.prototype,
+                superClass?.prototype ??
+                superClass?.constructor?.prototype ??
+                superClass
+            );
+        } catch (e) {
+            console.warn(e, {
+                thisClass,
+                superClass
+            });
+        }
+        return thisClass;
+    };
     let logged = false;
     let last;
     const fetchCache = new WeakRefMap();
     const _fetch = self.fetch;
-    self.fetch = Object.setPrototypeOf(async function fetch(...args) {
+    self.fetch = extend(async function fetch(...args) {
         const url = String(args[0]?.url ?? args[0]);
         try {
             const fromCache = fetchCache.get(url);
